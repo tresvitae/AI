@@ -1,0 +1,29 @@
+import openai
+import configparser
+import sys
+from datetime import datetime
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+api_key = config['API']['key']
+
+openai.api_key = api_key
+
+def write_prompt_history(prompt, response):
+    with open('prompt_history.txt', 'a') as file:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        file.write(f"{timestamp}:: {prompt}\n{response}\n\n")
+
+prompt = sys.argv[1]
+
+response = openai.ChatCompletion.create(
+  model="gpt-3.5-turbo",
+  messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+    ]
+)
+
+output = response.choices[0].message.content.strip()
+print(output)
+write_prompt_history(prompt, output)
